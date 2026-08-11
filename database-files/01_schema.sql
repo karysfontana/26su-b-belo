@@ -52,7 +52,6 @@ CREATE TABLE Manager (
    FOREIGN KEY (userID) REFERENCES User(UserID)
 );
 
-
 DROP TABLE IF EXISTS Customer;
 CREATE TABLE Customer (
    customerID INT PRIMARY KEY,
@@ -111,7 +110,6 @@ CREATE TABLE Restaurants (
    FOREIGN KEY (ManagerID) REFERENCES Manager(ManagerID),
    FOREIGN KEY (MenuID) REFERENCES Menu(menuID)
 );
-
 
 DROP TABLE IF EXISTS Restaurant_cuisine;
 CREATE TABLE Restaurant_cuisine (
@@ -262,4 +260,3 @@ CREATE TABLE seating_WaitList (
    FOREIGN KEY (chartID) REFERENCES SeatingChart(chartID),
    FOREIGN KEY (entryID) REFERENCES WaitList(entryID)
 );
-
