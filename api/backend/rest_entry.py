@@ -1,6 +1,9 @@
 from flask import Flask
 from dotenv import load_dotenv
 from flask.json.provider import DefaultJSONProvider
+from backend.admin.admin_route import admin
+from backend.waitlist.waitlist_route import waitlist
+from backend.menu.menu_route import menu
 from datetime import timedelta
 from decimal import Decimal
 import os
@@ -63,5 +66,8 @@ def create_app():
     app.register_blueprint(reviews)
     app.register_blueprint(reservations)
     app.register_blueprint(users)
+    app.register_blueprint(admin)
+    app.register_blueprint(waitlist)
+    app.register_blueprint(menu)
 
     return app
