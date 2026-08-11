@@ -9,12 +9,13 @@ st.write("# About this App")
 
 st.markdown(
     """
-    This is a demo app for the CS 3200 Summer B 2026 Database Design Project Course.  
+    BELO is a restaurant reviewing application that allows users to post reviews, 
+    make reservations, follow their friends, and view the restaurants their friends reviewed.
+    BELO centers reviews around your social graph: instead of trusting random strangers, 
+    you can see ratings from your friends that are stored in the app, making recommendations
+    far more reliable and relevant. Managers can also edit their restaurant information, 
+    view reviews, and accept reservations.
 
-    The goal of this demo is to provide information on the tech stack 
-    being used as well as demo some of the features of the various platforms. 
-
-    Stay tuned for more information and features to come!
     """
 )
 
