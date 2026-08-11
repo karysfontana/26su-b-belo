@@ -25,130 +25,115 @@ def get_customers():
         cursor.close()
 
 
-# Get detailed information about a specific customer
-# Example: /customers/1
+# Get a customer's profile
 @customers.route("/customers/<int:customer_id>", methods=["GET"])
-def get_customer(customer_id):
+def get_customer_profile(customerID):
     cursor = get_db().cursor(dictionary=True)
     try:
-        cursor.execute("SELECT * FROM WorldNGOs WHERE NGO_ID = %s", (ngo_id,))
-        ngo = cursor.fetchone()
-
-        if not ngo:
-            return jsonify({"error": "NGO not found"}), 404
-
-        # Reuse the same cursor for the follow-up queries
-        cursor.execute("SELECT * FROM Projects WHERE NGO_ID = %s", (ngo_id,))
-        ngo["projects"] = cursor.fetchall()
-
-        cursor.execute("SELECT * FROM Donors WHERE NGO_ID = %s", (ngo_id,))
-        ngo["donors"] = cursor.fetchall()
-
-        return jsonify(ngo), 200
+        cursor.execute('''
+            SELECT c.customerID, c.firstname, c.lastname, u.status, u.signUpDate
+            FROM Customer c
+            JOIN User u ON c.userID = u.UserID
+            WHERE c.customerID = %s
+        ''', (customerID,))
+        theData = cursor.fetchone()
+ 
+        if not theData:
+            return jsonify({'error': 'Customer not found'}), 404
+        return jsonify(theData), 200
     except Error as e:
-        return jsonify({"error": str(e)}), 500
+        current_app.logger.error(f'Database error in get_customer: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+
+#create a new customer account
+@customers.route('/customers', methods=['POST'])
+def create_customer():
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info('POST /customers route')
+        data = request.get_json()
+ 
+        for field in ['firstname', 'lastname']:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+ 
+        status = data.get('status', 'active')
+ 
+        cursor.execute('INSERT INTO User (status) VALUES (%s)', (status,))
+        new_user_id = cursor.lastrowid
+ 
+        cursor.execute(
+            'INSERT INTO Customer (firstname, lastname, userID) VALUES (%s, %s, %s)',
+            (data['firstname'], data['lastname'], new_user_id)
+        )
+        new_customer_id = cursor.lastrowid
+ 
+        get_db().commit()
+ 
+        return jsonify({
+            'message': 'Customer account created',
+            'customerID': new_customer_id,
+            'UserID': new_user_id
+        }), 201
+    except Error as e:
+        current_app.logger.error(f'Database error in create_customer: {str(e)}')
+        return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
 
 
-# # Create a new NGO
-# # Required fields: Name, Country, Founding_Year, Focus_Area, Website
-# # Example: POST /ngo/ngos with JSON body
-# @ngos.route("/ngos", methods=["POST"])
-# def create_ngo():
-#     cursor = get_db().cursor(dictionary=True)
-#     try:
-#         data = request.get_json()
-
-#         required_fields = ["Name", "Country", "Founding_Year", "Focus_Area", "Website"]
-#         for field in required_fields:
-#             if field not in data:
-#                 return jsonify({"error": f"Missing required field: {field}"}), 400
-
-#         query = """
-#             INSERT INTO WorldNGOs (Name, Country, Founding_Year, Focus_Area, Website)
-#             VALUES (%s, %s, %s, %s, %s)
-#         """
-#         cursor.execute(query, (
-#             data["Name"],
-#             data["Country"],
-#             data["Founding_Year"],
-#             data["Focus_Area"],
-#             data["Website"],
-#         ))
-
-#         get_db().commit()
-#         return jsonify({"message": "NGO created successfully", "ngo_id": cursor.lastrowid}), 201
-#     except Error as e:
-#         return jsonify({"error": str(e)}), 500
-#     finally:
-#         cursor.close()
-
-
-# # Update an existing NGO's information
-# # Can update any field except NGO_ID
-# # Example: PUT /ngo/ngos/1 with JSON body containing fields to update
-# @ngos.route("/ngos/<int:ngo_id>", methods=["PUT"])
-# def update_ngo(ngo_id):
-#     cursor = get_db().cursor(dictionary=True)
-#     try:
-#         data = request.get_json()
-
-#         cursor.execute("SELECT NGO_ID FROM WorldNGOs WHERE NGO_ID = %s", (ngo_id,))
-#         if not cursor.fetchone():
-#             return jsonify({"error": "NGO not found"}), 404
-
-#         # Build update query dynamically based on provided fields
-#         allowed_fields = ["Name", "Country", "Founding_Year", "Focus_Area", "Website"]
-#         update_fields = [f"{f} = %s" for f in allowed_fields if f in data]
-#         params = [data[f] for f in allowed_fields if f in data]
-
-#         if not update_fields:
-#             return jsonify({"error": "No valid fields to update"}), 400
-
-#         params.append(ngo_id)
-#         query = f"UPDATE WorldNGOs SET {', '.join(update_fields)} WHERE NGO_ID = %s"
-#         cursor.execute(query, params)
-#         get_db().commit()
-
-#         return jsonify({"message": "NGO updated successfully"}), 200
-#     except Error as e:
-#         return jsonify({"error": str(e)}), 500
-#     finally:
-#         cursor.close()
+# Edit customer info
+@customers.route('/customers/<int:customerID>', methods=['PUT'])
+def update_customer(customerID):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'PUT /customers/{customerID} route')
+        data = request.get_json()
+ 
+        cursor.execute('SELECT * FROM Customer WHERE customerID = %s', (customerID,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Customer not found'}), 404
+ 
+        update_fields, params = [], []
+        for field in ['firstname', 'lastname']:
+            if field in data:
+                update_fields.append(f'{field} = %s')
+                params.append(data[field])
+ 
+        if not update_fields:
+            return jsonify({'error': 'No valid fields to update'}), 400
+ 
+        params.append(customerID)
+        query = f'UPDATE Customer SET {", ".join(update_fields)} WHERE customerID = %s'
+        cursor.execute(query, params)
+        get_db().commit()
+ 
+        return jsonify({'message': f'Customer {customerID} updated'}), 200
+    except Error as e:
+        current_app.logger.error(f'Database error in update_customer: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
 
 
-# # Get all projects associated with a specific NGO
-# # Example: /ngo/ngos/1/projects
-# @ngos.route("/ngos/<int:ngo_id>/projects", methods=["GET"])
-# def get_ngo_projects(ngo_id):
-#     cursor = get_db().cursor(dictionary=True)
-#     try:
-#         cursor.execute("SELECT NGO_ID FROM WorldNGOs WHERE NGO_ID = %s", (ngo_id,))
-#         if not cursor.fetchone():
-#             return jsonify({"error": "NGO not found"}), 404
-
-#         cursor.execute("SELECT * FROM Projects WHERE NGO_ID = %s", (ngo_id,))
-#         return jsonify(cursor.fetchall()), 200
-#     except Error as e:
-#         return jsonify({"error": str(e)}), 500
-#     finally:
-#         cursor.close()
-
-
-# # Get all donors associated with a specific NGO
-# # Example: /ngo/ngos/1/donors
-# @ngos.route("/ngos/<int:ngo_id>/donors", methods=["GET"])
-# def get_ngo_donors(ngo_id):
-#     cursor = get_db().cursor(dictionary=True)
-#     try:
-#         cursor.execute("SELECT NGO_ID FROM WorldNGOs WHERE NGO_ID = %s", (ngo_id,))
-#         if not cursor.fetchone():
-#             return jsonify({"error": "NGO not found"}), 404
-
-#         cursor.execute("SELECT * FROM Donors WHERE NGO_ID = %s", (ngo_id,))
-#         return jsonify(cursor.fetchall()), 200
-#     except Error as e:
-#         return jsonify({"error": str(e)}), 500
-#     finally:
-#         cursor.close()
+# Delete an existing customer
+@customers.route('/customers/<int:customerID>', methods=['DELETE'])
+def delete_customer(customerID):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'DELETE /customers/{customerID} route')
+        cursor.execute('SELECT * FROM Customer WHERE customerID = %s', (customerID,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Customer not found'}), 404
+ 
+        cursor.execute('DELETE FROM Customer WHERE customerID = %s', (customerID,))
+        get_db().commit()
+ 
+        return jsonify({'message': f'Customer {customerID} deleted'}), 200
+    except Error as e:
+        current_app.logger.error(f'Database error in delete_customer: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()

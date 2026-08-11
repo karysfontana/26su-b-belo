@@ -4,8 +4,13 @@ import os
 import logging
 
 from backend.db_connection import init_app as init_db
-from backend.simple.simple_routes import simple_routes
+from backend.Restaurant_admin.restaurant_admin_route import restaurant_admin
+from backend.Restaurants.restaurants_routes import restaurants
 from backend.customers.customers_routes import customers
+from backend.Manager.manager_route import managers
+from backend.Review.review_route import reviews
+from backend.reservations.reservation_route import reservations
+from backend.users.user_route import users
 
 
 def create_app():
@@ -35,7 +40,12 @@ def create_app():
     # Register the routes from each Blueprint with the app object
     # and give a url prefix to each.
     app.logger.info("create_app(): registering blueprints")
-    app.register_blueprint(simple_routes)
-    app.register_blueprint(customers, url_prefix="/customers")
+    app.register_blueprint(restaurant_admin)
+    app.register_blueprint(restaurants)
+    app.register_blueprint(customers)
+    app.register_blueprint(managers)
+    app.register_blueprint(reviews)
+    app.register_blueprint(reservations)
+    app.register_blueprint(users)
 
     return app
