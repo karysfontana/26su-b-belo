@@ -1,5 +1,8 @@
 from flask import Flask
 from dotenv import load_dotenv
+from flask.json.provider import DefaultJSONProvider
+from datetime import timedelta
+from decimal import Decimal
 import os
 import logging
 
@@ -12,10 +15,23 @@ from backend.Review.review_route import reviews
 from backend.reservations.reservation_route import reservations
 from backend.users.user_route import users
 
-
+# Flask's default JSON encoder doesn't know how to turn a TIME column
+# (which mysql-connector returns as a Python timedelta) or a DECIMAL
+# column (returned as Decimal) into JSON. Without this, ANY route that
+# does SELECT * on Restaurants (openTime/closeTime) or Menu_Item (price)
+# crashes with "Object of type timedelta/Decimal is not JSON serializable".
+class CustomJSONProvider(DefaultJSONProvider):
+    @staticmethod
+    def default(obj):
+        if isinstance(obj, timedelta):
+            return str(obj)          # e.g. "9:00:00"
+        if isinstance(obj, Decimal):
+            return float(obj)        # e.g. 14.99
+        return DefaultJSONProvider.default(obj)
+    
 def create_app():
     app = Flask(__name__)
-
+    app.json = CustomJSONProvider(app)
     app.logger.setLevel(logging.DEBUG)
     app.logger.info('API startup')
 

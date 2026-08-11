@@ -25,7 +25,7 @@ CREATE TABLE Log (
 
 DROP TABLE IF EXISTS User;
 CREATE TABLE User (
-   UserID INT PRIMARY KEY,
+   UserID INT AUTO_INCREMENT PRIMARY KEY,
    status varchar(9) NOT NULL,
    signUpDate DATETIME DEFAULT (CURRENT_TIMESTAMP),
    flaggedBy INT,
@@ -54,7 +54,7 @@ CREATE TABLE Manager (
 
 DROP TABLE IF EXISTS Customer;
 CREATE TABLE Customer (
-   customerID INT PRIMARY KEY,
+   customerID INT AUTO_INCREMENT PRIMARY KEY,
    firstname varchar(40),
    lastname varchar(40),
    userID INT,

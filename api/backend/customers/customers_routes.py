@@ -26,7 +26,7 @@ def get_customers():
 
 
 # Get a customer's profile
-@customers.route("/customers/<int:customer_id>", methods=["GET"])
+@customers.route("/customers/<int:customerID>", methods=["GET"])
 def get_customer_profile(customerID):
     cursor = get_db().cursor(dictionary=True)
     try:

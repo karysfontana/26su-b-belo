@@ -24,7 +24,6 @@ def get_managers():
         cursor.close()
  
  
-#------------------------------------------------------------
 # Get one manager's profile
 @managers.route('/managers/<int:managerID>', methods=['GET'])
 def get_manager(managerID):
@@ -48,7 +47,6 @@ def get_manager(managerID):
         cursor.close()
  
  
-#------------------------------------------------------------
 # List every restaurant this manager owns/manages
 @managers.route('/managers/<int:managerID>/restaurants', methods=['GET'])
 def get_manager_restaurants(managerID):
@@ -64,9 +62,7 @@ def get_manager_restaurants(managerID):
         cursor.close()
  
  
-#------------------------------------------------------------
 # Edit manager info
-# Body: { "firstname": "...", "lastname": "..." }
 @managers.route('/managers/<int:managerID>', methods=['PUT'])
 def update_manager(managerID):
     cursor = get_db().cursor(dictionary=True)
@@ -99,4 +95,23 @@ def update_manager(managerID):
     finally:
         cursor.close()
  
- 
+
+ # List all reservations across every restaurant this manager owns
+@managers.route('/managers/<int:managerID>/reservations', methods=['GET'])
+def get_manager_reservations(managerID):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        cursor.execute('''
+            SELECT r.*
+            FROM Reservation r
+            JOIN Restaurants rest ON r.RestaurantID = rest.RestaurantID
+            WHERE rest.ManagerID = %s
+            ORDER BY r.date
+        ''', (managerID,))
+        theData = cursor.fetchall()
+        return jsonify(theData), 200
+    except Error as e:
+        current_app.logger.error(f'Database error in get_manager_reservations: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
