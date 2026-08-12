@@ -1,70 +1,99 @@
-# Summer B 2026 CS 3200 Project Template
+# BELO — CS 3200 Summer B 2026 Project
 
-This is a template repo for Dr. Fontenot's Summer B 2026 CS 3200 Course Project.
+**Team:** Port Authority
+**Members:** Richie Nguyen, Hosam Esawy, Karys Fontana, Nora Harr
 
-It includes most of the infrastructure setup (containers), sample databases, and example UI pages. Explore it fully and ask questions!
+BELO is a restaurant-reviewing application that lets users post reviews, make reservations, follow friends, and see the restaurants their friends have reviewed — think a social-graph layer on top of a review platform. Ratings are broken into food, service, and vibe rather than one generic star score, so a review actually communicates *why* a place was good or bad.
 
-## Prerequisites
+## Overview
 
-See [docs/PreReq.md](docs/PreReq.md) for full setup instructions, including Python environment setup with Anaconda/Miniconda or the standard Python virtual environment tool, required tools, and IDE configuration.
+BELO serves three personas:
 
-A full index of the project documentation is in [docs/README.md](docs/README.md).
+- **Customer/Reviewer** (modeled on Peter Griffin) — browses and filters restaurants, writes reviews with food/service/vibe ratings, follows other users, and requests reservations.
+- **Restaurant Owner/Manager** (modeled on Bob Belcher) — edits restaurant details and menu items, manages incoming reservations and the walk-in waitlist, and reviews feedback on their restaurant.
+- **Platform Admin** (modeled on Judy Hopps) — reviews and resolves ownership claims on restaurant listings, merges duplicate listings, removes reported reviews, suspends flagged accounts, and manages cuisine/neighborhood tags.
+
 
 ## Structure of the Repo
 
-- This repository is organized into six main directories:
-  - `./app` - the Streamlit app
-  - `./api` - the Flask REST API
-  - `./database-files` - SQL scripts to initialize the MySQL database
-  - `./datasets` - folder for storing datasets
-  - `./ml-src` - folder for ML model development (Jupyter notebooks, training scripts)
-  - `./docs` - project documentation
+This repository is organized into the same six directories as the course template:
 
-- The repo also contains a `docker-compose.yaml` file that is used to set up the Docker containers for the front end app, the REST API, and MySQL database.
+- `./app` — the Streamlit frontend
+- `./api` — the Flask REST API, organized into Blueprints by database table/resource:
+  `restaurants`, `restaurant_admin`, `customers`, `managers`, `reviews`, `reservations`, `users`, `admin` (claims + logs), `waitlist`, `menu`
+- `./database-files` — SQL scripts that build the schema and populate it with realistic mock data (via the Python Faker library)
+- `./datasets` — not used in this project
+- `./ml-src` — not used in this project (BELO does not incorporate a machine learning model)
+- `./docs` — project documentation inherited from the course template
 
-## Suggestion for Learning the Project Code Base
+## Prerequisites
 
-If you are not familiar with web app development, this code base might be confusing. But don't worry, we'll get through it together. Here are some suggestions for learning the code base:
+You'll need Docker Desktop installed and running. No local Python environment is required to run the app — everything executes inside containers.
 
-1. Start by exploring the `./app` directory. This is where the Streamlit app is located. The Streamlit app is a Python-based web app that is used to interact with the user. It's a great way to build a simple web app without having to learn a lot of web development.
-1. Next, explore the `./api` directory. This is where the Flask REST API is located. The REST API is used to interact with the database and perform other server-side tasks. You might also consider this the "application logic" or "business logic" layer of your app.
-1. Finally, explore the `./database-files` directory. This is where the SQL scripts are located that will be used to initialize the MySQL database.
-1. Bonus: If you want a totally separate copy of the template repo on your laptop to explore and experiment with without affecting your team repo, see the *Setting Up a Personal Sandbox Repo* section in [docs/RepoSetup.md](docs/RepoSetup.md).
+## Setting Up and Running the Project
 
-## Setting Up the Repos
+1. Clone the repo:
+   ```
+   git clone https://github.com/karysfontana/26su-b-belo.git
+   cd 26su-b-belo
+   ```
 
-See [docs/RepoSetup.md](docs/RepoSetup.md) for full instructions on forking and configuring the team repo, setting up the `.env` file, and running the Docker containers. An optional section there also covers setting up a personal sandbox repo for individual experimentation.
+2. Create your `.env` file inside the `api/` folder:
+   ```
+   cd api
+   cp .env.template .env
+   ```
+   Then open `.env` and set a real password for `MYSQL_ROOT_PASSWORD`. Confirm `DB_NAME=BELO` to match the database created by our schema file.
 
-## Important Tips
+3. From the repo root, start all three containers:
+   ```
+   docker compose up -d
+   ```
+   This builds and starts the Streamlit app, the Flask API, and the MySQL database. On first run, MySQL automatically executes every `.sql` file in `database-files/` in alphabetical order — our schema file, followed by our mock data file.
 
-See [docs/ImportantTips.md](docs/ImportantTips.md) for tips on hot reloading, recovering from container crashes, and working with the MySQL container — including why you need the `-v` flag to pick up changes to your SQL files.
+4. Open the app in your browser:
+   ```
+   http://localhost:8501
+   ```
+   The API is reachable directly at `http://localhost:4000` for testing individual routes.
 
-## Handling User Role Access and Control
+### If you change the schema or mock data
 
-This project uses a simple Role-based Access Control (RBAC) system implemented in Streamlit. The template ships with example roles (*Political Strategist*, *USAID Worker*, *System Administrator*) to illustrate the pattern — **your team will replace these with the personas specific to your project**. You will define four personas and implement three of them.
+MySQL only runs the files in `database-files/` the *first* time its data volume is created — editing a `.sql` file afterward has no effect until the volume is rebuilt:
+```
+docker compose down -v
+docker compose up -d
+```
+The `-v` flag deletes the existing database volume so your updated files actually run again.
 
-See [docs/RBAC.md](docs/RBAC.md) for a full explanation of how the RBAC system works and step-by-step instructions for adapting it to your own roles.
+## Handling User Role Access and Control (RBAC)
 
-## Changing How the App Looks
+BELO uses the same lightweight, no-real-authentication RBAC pattern as the course template: clicking a role button on the Home page writes a role string into Streamlit's `session_state`, and `SideBarLinks()` in `app/src/modules/nav.py` renders only the pages appropriate to that role. See the template's `docs/RBAC.md` for the full mechanics — our implementation follows it directly, just with BELO's three personas in place of the template's examples.
 
-The app's colors, fonts, and sidebar styling all come from `app/src/.streamlit/config.toml` — there is no CSS to edit. Save the file and the running app picks the change up; refresh the browser tab if you don't see it.
+| Button | Role string | Redirects to |
+|---|---|---|
+| Act as a Customer/Reviewer | `customer` | `pages/00_Peter_Home.py` |
+| Act as a Restaurant Owner/Manager | `manager` | `pages/10_Bob_Home.py` |
+| Act as a Platform Admin | `admin` | `pages/20_Judy_Home.py` |
 
-See [docs/Theming.md](docs/Theming.md) for what each setting does and how to build your own palette.
+Rather than hardcoding specific IDs for each persona, our Home page pulls a real customer/manager/admin record from the API at login time — this keeps the login flow working correctly even after the database is reset and reseeded with fresh mock data.
 
-## (Completely Optional) Incorporating ML Models into your Project
+## Machine Learning
 
-**This is entirely optional. No part of the project requires a machine learning model, and you are not expected to build one.** The template simply happens to include the plumbing for a hypothetical model, described below, in case your team is curious and has spare time. Skipping this section costs you nothing.
+Not used in this project. BELO's functionality is fully covered by standard CRUD operations across its REST API; no predictive model was needed or built.
 
-The model shipped in `api/backend/ml_models/model01.py` is a *fake* placeholder — it reads coefficients out of the `model1_params` table and computes a dot product. It is there to show the wiring, not to make real predictions.
+## Known Limitations
 
-If you do want to explore it:
+A couple of gaps are visible in the current build, called out here rather than glossed over:
 
-1. Collect and preprocess necessary datasets for your models.
-1. Build, train, and test your model in a Jupyter Notebook.
-   - You can store your datasets in the `datasets` folder and your notebook in the `ml-src` folder.
-1. Once your team is happy with the model's performance, convert your notebook code to a pure Python script.
-   - You can include the `training` and `testing` functionality as well as the `prediction` functionality.
-   - Develop and test this pure Python script first in the `ml-src` folder.
-1. Review the `api/backend/ml_models` module. **Important**: you would never want to hard code the model parameter weights directly in the prediction function — store them in the database, as `model01.py` does.
-1. The prediction route for the REST API is in `api/backend/simple/simple_routes.py`. It accepts two URL parameters and passes them to the `predict` function in the `ml_models` module, then packages the result back to Streamlit as JSON.
-1. Back in Streamlit, check out `app/src/pages/11_Prediction.py`. Two numeric input fields are created; when the button is pressed, it makes a request to the REST API at `/prediction/{var_01}/{var_02}` and displays the results.
+- **Seating chart / table-count management** (would support persona story 2.6) has no backend routes yet — this was scoped in our wireframes but not implemented in the API by our Phase 3 deadline.
+- **Filing a new ownership claim** (`POST /claims`) is not yet implemented — claims can be viewed and resolved via the API, but the creation step is outstanding.
+
+## Video Demo
+
+[Link to be added]
+
+## Team Contributions
+
+- **Richie Nguyen** — `restaurants`, `restaurant_admin`, `customers`, `managers`, `reviews`, `reservations`, and `users` Flask blueprints; database schema and mock data generation
+- **Hosam Esawy, Karys Fontana, Nora Harr** — `admin` (claims/logs), `waitlist`, and `menu` Flask blueprints

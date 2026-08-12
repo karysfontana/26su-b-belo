@@ -1,5 +1,6 @@
 import logging
 logger = logging.getLogger(__name__)
+
 import pandas as pd
 import streamlit as st
 import requests
@@ -9,6 +10,8 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
+st.title('System Admin Home Page')
+st.write('### What would you like to do today?')
 st.header('Admin Home')
 
 # Flask API URL
@@ -37,6 +40,10 @@ col2.metric(f"Resolved by {choice}", len(mine))
 
 st.divider()
 
+if st.button('Update ML Models',
+             type='primary',
+             use_container_width=True):
+    st.switch_page('pages/21_ML_Model_Mgmt.py')
 st.write("### Claims waiting")
 st.dataframe(
     pd.DataFrame(pending)[["claimID", "restaurantName", "dateSubmitted"]],

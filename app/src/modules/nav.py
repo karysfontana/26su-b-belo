@@ -15,22 +15,10 @@ def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
 
-# ---- Role: pol_strat_advisor ------------------------------------------------
+# ---- Role: Admin ------------------------------------------------
 
-def pol_strat_home_nav():
-    st.sidebar.page_link(
-        "pages/00_Pol_Strat_Home.py", label="Political Strategist Home", icon="👤"
-    )
-
-
-def world_bank_viz_nav():
-    st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
-    )
-
-
-def map_demo_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
+def LogsNav():
+    st.sidebar.page_link("pages/23_Logs.py", label="Activity Log", icon="🗒️")
 
 
 # ---- Role: usaid_worker -----------------------------------------------------
@@ -86,7 +74,7 @@ def SideBarLinks(show_home=False):
     """
 
     # Logo appears at the top of the sidebar on every page
-    st.sidebar.image("assets/logo.png", width=650)
+    st.sidebar.image("assets/logo.png", width=650)  
 
     # If no one is logged in, send them to the Home (login) page
     if "authenticated" not in st.session_state:
@@ -114,6 +102,8 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "administrator":
             admin_home_nav()
             ml_model_mgmt_nav()
+        if st.session_state["role"] == "admin":
+                LogsNav()  
 
     # About link appears at the bottom for all roles
     about_page_nav()

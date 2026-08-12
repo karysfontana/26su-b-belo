@@ -1879,4 +1879,3 @@ INSERT INTO flagged_restaurant (adminID, RestaurantID) VALUES
 (1000, 1027),
 (1005, 1005),
 (1005, 1028);
-
