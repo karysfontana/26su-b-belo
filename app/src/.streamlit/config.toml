@@ -33,7 +33,7 @@ runOnSave = true
 base = "light"
 
 # Accent color: buttons, sliders, focus rings, selected states.
-primaryColor = "#2C6E63"
+primaryColor = "#e17c29"
 
 # Page background and the shade used for cards, code blocks, and tables.
 backgroundColor = "#FBFAF7"
@@ -41,7 +41,7 @@ secondaryBackgroundColor = "#F1EFE9"
 
 # Body text and links.
 textColor = "#1F2421"
-linkColor = "#2C6E63"
+linkColor = "#e17c29"
 
 # Serif headings against sans-serif body text keeps headings distinct
 # without needing custom CSS. Code stays monospace, where it belongs.
@@ -66,5 +66,5 @@ showWidgetBorder = true
 backgroundColor = "#f7b071"
 secondaryBackgroundColor = "#d5f9f1"
 textColor = "#2c3832"
-primaryColor = "#ecba74"
-borderColor = "#e2b6c8"
+primaryColor = "#e17c29"
+borderColor = "#fdbdd8"
