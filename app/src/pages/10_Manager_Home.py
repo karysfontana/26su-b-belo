@@ -9,30 +9,30 @@ st.set_page_config(layout='wide')
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
 
-st.title(f"Welcome USAID Worker, {st.session_state['first_name']}.")
+st.title(f"Welcome Manager, {st.session_state['first_name']}.")
 st.write('### What would you like to do today?')
 
-if st.button('View NGO Directory',
+if st.button('View Waitlist',
              type='primary',
              use_container_width=True):
     st.switch_page('pages/14_NGO_Directory.py')
 
-if st.button('Add New NGO',
+if st.button('Add to Waitlist',
              type='primary',
              use_container_width=True):
     st.switch_page('pages/15_Add_NGO.py')
 
-if st.button('Predict Value Based on Regression Model',
+if st.button('View Seating Chart',
              type='primary',
              use_container_width=True):
     st.switch_page('pages/11_Prediction.py')
 
-if st.button('View the Simple API Demo',
+if st.button('View Reservations',
              type='primary',
              use_container_width=True):
     st.switch_page('pages/12_API_Test.py')
 
-if st.button('View Classification Demo',
+if st.button('Edit Restaurant Information',
              type='primary',
              use_container_width=True):
     st.switch_page('pages/13_Classification.py')

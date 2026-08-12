@@ -29,13 +29,13 @@ def show_success_dialog(ngo_name):
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("Return to NGO Directory", use_container_width=True):
+        if st.button("Return to Waitlist", use_container_width=True):
             st.session_state.show_success_modal = False
             st.session_state.success_ngo_name = ""
             st.switch_page("pages/14_NGO_Directory.py")
     
     with col2:
-        if st.button("Add Another NGO", use_container_width=True):
+        if st.button("Add Party", use_container_width=True):
             st.session_state.show_success_modal = False
             st.session_state.success_ngo_name = ""
             st.session_state.reset_form = True
@@ -54,7 +54,7 @@ with st.form(f"add_ngo_form_{st.session_state.form_key_counter}"):
     st.subheader("NGO Information")
 
     # Required fields
-    name = st.text_input("Organization Name *")
+    name = st.text_input("Party Name *")
     country = st.text_input("Country *")
     current_year = datetime.date.today().year
     founding_year = st.number_input(
