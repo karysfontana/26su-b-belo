@@ -13,7 +13,7 @@ st.header('My Reservations')
 st.write(f"### Hi, {st.session_state['first_name']}.")
 
 # API endpoint assumes customer ID is stored in session state after login
-customer_id = 1012
+customer_id = 1025
 API_URL = f"http://web-api:4000/reservations/customers/{customer_id}/reservations"
 
 # --- Fetch reservations ---
