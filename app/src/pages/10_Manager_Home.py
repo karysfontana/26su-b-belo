@@ -15,12 +15,12 @@ st.write('### What would you like to do today?')
 if st.button('View Waitlist',
              type='primary',
              use_container_width=True):
-    st.switch_page('pages/14_NGO_Directory.py')
+    st.switch_page('pages/14_Waitlist.py')
 
 if st.button('Add to Waitlist',
              type='primary',
              use_container_width=True):
-    st.switch_page('pages/15_Add_NGO.py')
+    st.switch_page('pages/15_Add_Waitlist.py')
 
 if st.button('View Seating Chart',
              type='primary',
