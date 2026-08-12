@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import requests
+import pandas as pd
 import streamlit as st
 from modules.nav import SideBarLinks
 
@@ -63,7 +64,7 @@ if customer:
     # --- Following list ---
     st.subheader("People You Follow")
 
-    user_id = 1000  # the User table ID, distinct from customer_id
+    user_id = customer.get('userID')  # the User table ID, distinct from customer_id
 
     try:
         follows_resp = requests.get(f"http://web-api:4000/users/users/{user_id}/follows")
