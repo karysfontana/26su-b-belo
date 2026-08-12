@@ -35,4 +35,4 @@ if st.button('View Reservations',
 if st.button('Edit Restaurant Information',
              type='primary',
              use_container_width=True):
-    st.switch_page('pages/13_Classification.py')
+    st.switch_page('pages/17_Manager_Restaurant.py')
