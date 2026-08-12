@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import requests
 import streamlit as st
 from modules.nav import SideBarLinks
 
@@ -11,6 +12,8 @@ SideBarLinks()
 
 st.title(f"Welcome Manager, {st.session_state['first_name']}.")
 st.write('### What would you like to do today?')
+
+API_URL = "http://web-api:4000/manager"
 
 if st.button('View Waitlist',
              type='primary',
