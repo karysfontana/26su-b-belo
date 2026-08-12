@@ -64,6 +64,20 @@ def ml_model_mgmt_nav():
         "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
     )
 
+def admin_claims_nav():
+    st.sidebar.page_link(
+        "pages/24_Admin_Claims.py", label="Claims", icon="📋"
+    )
+
+def admin_accounts_nav():
+    st.sidebar.page_link(
+        "pages/22_Admin_Accounts_Review.py", label="Accounts", icon="👥"
+    )
+
+def admin_logs_nav():
+    st.sidebar.page_link(
+        "pages/23_Logs.py", label="Audit Logs", icon="📋"
+    )
 
 # ---- Sidebar assembly -------------------------------------------------------
 
@@ -101,9 +115,10 @@ def SideBarLinks(show_home=False):
 
         if st.session_state["role"] == "administrator":
             admin_home_nav()
-            ml_model_mgmt_nav()
-        if st.session_state["role"] == "admin":
-                LogsNav()  
+            admin_claims_nav()
+            admin_accounts_nav()
+            admin_logs_nav()
+
 
     # About link appears at the bottom for all roles
     about_page_nav()
