@@ -39,14 +39,3 @@ col1.metric("Claims waiting for review", len(pending))
 col2.metric(f"Resolved by {choice}", len(mine))
 
 st.divider()
-
-if st.button('Update ML Models',
-             type='primary',
-             use_container_width=True):
-    st.switch_page('pages/21_ML_Model_Mgmt.py')
-st.write("### Claims waiting")
-st.dataframe(
-    pd.DataFrame(pending)[["claimID", "restaurantName", "dateSubmitted"]],
-    use_container_width=True,
-    hide_index=True
-)

@@ -10,7 +10,6 @@ st.set_page_config(layout='wide')
 SideBarLinks()
 
 st.header('Restaurant Administration')
-st.write(f"### Hi, {st.session_state['first_name']}.")
 
 # --- Acting-as admin selector (needed for resolving claims / writing logs) ---
 try:

@@ -10,7 +10,6 @@ st.set_page_config(layout='wide')
 SideBarLinks()
 
 st.header('Account Administration')
-st.write(f"### Hi, {st.session_state['first_name']}.")
 
 tab1, tab2, tab3 = st.tabs(["All Accounts", "Account Detail", "Suspend / Reinstate / Delete"])
 
