@@ -1592,9 +1592,9 @@ INSERT INTO WaitList (entryID, partySize, firstName, lastName, arrivalTime, seat
 (1069, 3, 'Kenneth', 'Gonzalez', '2026-04-21 08:13:10', '2026-04-21 08:42:10', 1006, 1020);
 
 INSERT INTO Follows (followerID, followingID) VALUES
-(1012, 1021),
-(1012, 1028),
-(1012, 1030),
+(1000, 1021),
+(1000, 1028),
+(1000, 1030),
 (1013, 1054),
 (1013, 1018),
 (1013, 1028),
