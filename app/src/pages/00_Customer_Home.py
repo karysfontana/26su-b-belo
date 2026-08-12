@@ -41,3 +41,8 @@ if st.button('Edit a Review',
              type='primary',
              use_container_width=True):
     st.switch_page('pages/06_Customer_Edit_Review.py')
+
+if st.button("View Friends' Ratings",
+             type='primary',
+             use_container_width=True):
+    st.switch_page('pages/33_customer_friend.py')

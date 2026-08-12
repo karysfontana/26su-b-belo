@@ -97,6 +97,9 @@ def admin_logs_nav():
         "pages/23_Logs.py", label="Audit Logs", icon="📋"
     )
 
+def customer_friends_nav():
+    st.sidebar.page_link("pages/33_customer_friend.py", label="Friends reviews", icon="👥")
+
 # ---- Sidebar assembly -------------------------------------------------------
 
 def SideBarLinks(show_home=False):
@@ -125,6 +128,7 @@ def SideBarLinks(show_home=False):
             customer_profile_nav()
             customer_reviews_nav()
             customer_create_review_nav()
+            customer_friends_nav()
 
         if st.session_state["role"] == "manager":
             manager_home_nav()

@@ -1726,7 +1726,10 @@ INSERT INTO Follows (followerID, followingID) VALUES
 (1055, 1018),
 (1056, 1048),
 (1056, 1055),
-(1056, 1019);
+(1056, 1019),
+(1012, 1013),
+(1012, 1014),
+(1012, 1017);
 
 INSERT INTO ReservedSeating (resvID, chartID) VALUES
 (1058, 1035),
