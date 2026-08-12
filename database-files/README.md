@@ -9,9 +9,11 @@ BELO is a restaurant-reviewing application that lets users post reviews, make re
 
 BELO serves three personas:
 
-- **Customer/Reviewer** — browses and filters restaurants, writes reviews with food/service/vibe ratings, follows other users, and requests reservations.
+- **Customer/Reviewer** — browses and filters restaurants, writes reviews with food/service/vibe ratings, requests reservations, and follows other users to see a personalized feed of reviews from people they trust.
 - **Restaurant Owner/Manager** — edits restaurant details and menu items, manages incoming reservations and the walk-in waitlist, sets seating availability, and reviews feedback on their restaurant.
 - **Platform Admin** — reviews and resolves ownership claims on restaurant listings, merges duplicate listings, removes reported reviews, suspends flagged accounts, and manages cuisine/neighborhood tags.
+
+A fourth persona, **Growth & Business Intelligence Analyst**, was scoped in our Phase 1/2 design but was not carried into Phase 3, per the assignment's allowance to implement 3 of 4 personas. Its entities remain part of the database model.
 
 ## Structure of the Repo
 
@@ -25,7 +27,7 @@ BELO serves three personas:
 
 ### API note
 
-Every blueprint is registered with a `url_prefix` matching its own name (e.g. `restaurants` blueprint → `url_prefix='/restaurants'`). Since each blueprint's individual routes already include their full path, this means most real endpoints are "doubled" — for example, the restaurant list lives at `/restaurants/restaurants`, not `/restaurants`. This is a known quirk of the current setup, not a bug in the routes themselves; when adding a new frontend call, check the actual registered path in `rest_entry.py` rather than assuming.
+Every blueprint is registered with a `url_prefix` matching its own name (e.g. the `restaurants` blueprint uses `url_prefix='/restaurants'`). Since each blueprint's individual routes already include their full path, most real endpoints end up "doubled" — for example, the restaurant list lives at `/restaurants/restaurants`, not `/restaurants`. This is a known quirk of the current setup, not a bug in the routes themselves; when adding a new frontend call, check the actual registered path in `rest_entry.py` rather than assuming.
 
 ## Prerequisites
 
@@ -76,7 +78,7 @@ BELO uses the same lightweight, no-real-authentication RBAC pattern as the cours
 | Act as Megan, a Manager | `manager` | `pages/10_Manager_Home.py` |
 | Act as Judy, a System Administrator | `admin` | `pages/20_Admin_Home.py` |
 
-Each login sets a hardcoded demo ID (`customer_id`, `manager_id`, or `admin_id` = `1000`) corresponding to a real seeded record, so the logged-in persona's pages have real data to work with immediately.
+Each login sets a demo ID (`customer_id`, `manager_id`, or `admin_id`) corresponding to a real seeded record, so the logged-in persona's pages have real data to work with immediately.
 
 ## Machine Learning
 
@@ -93,5 +95,5 @@ Not used in this project. BELO's functionality is fully covered by standard CRUD
 
 ## Team Contributions
 
-- **Richie Nguyen** — `Restaurants`, `Restaurant_admin`, `customers`, `Manager`, `Review`, `reservations`, `users`, and `seatingchart` Flask blueprints; database schema and mock data generation; Helped with Streamlit pages for the Customer and Manager personas
-- **Hosam Esawy** — `admin` (claims/logs), `waitlist`, and `menu` Flask blueprints; Streamlit pages for the Admin persona
+- **Richie Nguyen** — `Restaurants`, `Restaurant_admin`, `customers`, `Manager`, `Review` (including the friends-feed route), `reservations`, `users`, and `seatingchart` Flask blueprints; database schema and mock data generation; Streamlit pages some of the personas
+- **Hosam Esawy, Karys Fontana, Nora Harr** — `admin` (claims/logs), `waitlist`, and `menu` Flask blueprints; Streamlit pages for the Admin persona
