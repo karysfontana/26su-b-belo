@@ -1,42 +1,73 @@
 import logging
 logger = logging.getLogger(__name__)
 import pandas as pd
+import requests
 import streamlit as st
-import world_bank_data as wb
-import matplotlib.pyplot as plt
-import numpy as np
-import plotly.express as px
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
 
-# Call the SideBarLinks from the nav module in the modules directory
 SideBarLinks()
 
-# set the header of the page
-st.header('World Bank Data')
+st.header('Find Restaurants')
 
-# You can access the session state to make a more customized/personalized app experience
-st.write(f"### Hi, {st.session_state['first_name']}.")
+# API endpoints
+API_URL = "http://web-api:4000/restaurants/restaurants"
+CUISINE_TAGS_URL = "http://web-api:4000/restaurants/cuisinetags"
 
-# get the countries from the world bank data
-with st.echo(code_location='above'):
-    countries:pd.DataFrame = wb.get_countries()
-   
-    st.dataframe(countries)
+# --- Fetch cuisine tags for the filter dropdown ---
+try:
+    cuisine_resp = requests.get(CUISINE_TAGS_URL)
+    cuisine_resp.raise_for_status()
+    cuisine_tags = cuisine_resp.json()
+    cuisine_options = ["All"] + sorted([c['CuisineType'] for c in cuisine_tags])
+except requests.exceptions.RequestException as e:
+    logger.error(f"Error fetching cuisine tags: {e}")
+    cuisine_options = ["All"]
 
-# the with statment shows the code for this block above it 
-with st.echo(code_location='above'):
-    arr = np.random.normal(1, 1, size=100)
-    test_plot, ax = plt.subplots()
-    ax.hist(arr, bins=20)
+# --- Filters ---
+col1, col2, col3 = st.columns(3)
 
-    st.pyplot(test_plot)
+with col1:
+    cuisine_filter = st.selectbox("Cuisine", cuisine_options)
 
+with col2:
+    price_filter = st.selectbox("Price Range", ["All", "$", "$$", "$$$", "$$$$"])
 
-with st.echo(code_location='above'):
-    slim_countries = countries[countries['incomeLevel'] != 'Aggregates']
-    data_crosstab = pd.crosstab(slim_countries['region'], 
-                                slim_countries['incomeLevel'],  
-                                margins = False) 
-    st.table(data_crosstab)
+with col3:
+    city_filter = st.text_input("City", "")
+
+# --- Build query params based on filters ---
+params = {}
+if cuisine_filter != "All":
+    params['cuisine'] = cuisine_filter
+if price_filter != "All":
+    params['priceRange'] = price_filter
+if city_filter:
+    params['city'] = city_filter
+
+# --- Fetch restaurants ---
+try:
+    response = requests.get(API_URL, params=params)
+    response.raise_for_status()
+    restaurants = response.json()
+except requests.exceptions.RequestException as e:
+    logger.error(f"Error fetching restaurants: {e}")
+    st.error("Could not load restaurants. Please try again later.")
+    restaurants = []
+
+if restaurants:
+    df = pd.DataFrame(restaurants)
+
+    # --- Sorting controls ---
+    sort_col1, sort_col2 = st.columns(2)
+    with sort_col1:
+        sort_by = st.selectbox("Sort by", options=df.columns.tolist(), index=df.columns.get_loc('name'))
+    with sort_col2:
+        sort_order = st.radio("Order", ["Ascending", "Descending"], horizontal=True)
+
+    df = df.sort_values(by=sort_by, ascending=(sort_order == "Ascending"))
+
+    st.dataframe(df, use_container_width=True, hide_index=True)
+else:
+    st.info("No restaurants found matching your filters.")
