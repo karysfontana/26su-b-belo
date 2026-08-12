@@ -50,12 +50,36 @@ if customer:
         if submitted:
             payload = {"firstname": new_firstname, "lastname": new_lastname}
             try:
-                update_resp = requests.put(f"http://web-api:4000/customers/{customer_id}", json=payload)
+                update_resp = requests.put(f"http://web-api:4000/customers/customers/{customer_id}", json=payload)
                 update_resp.raise_for_status()
                 st.success("Profile updated.")
                 st.rerun()
             except requests.exceptions.RequestException as e:
                 logger.error(f"Error updating customer profile: {e}")
                 st.error("Could not update profile. Please try again.")
+
+                st.divider()
+
+    # --- Following list ---
+    st.subheader("People You Follow")
+
+    user_id = 1000  # the User table ID, distinct from customer_id
+
+    try:
+        follows_resp = requests.get(f"http://web-api:4000/users/users/{user_id}/follows")
+        follows_resp.raise_for_status()
+        follows = follows_resp.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching follows for user {user_id}: {e}")
+        st.error("Could not load your following list.")
+        follows = []
+
+    if follows:
+        follows_df = pd.DataFrame(follows)
+        st.dataframe(follows_df, use_container_width=True, hide_index=True)
+    else:
+        st.write("You're not following anyone yet.")
 else:
     st.info("No profile found.")
+
+    
