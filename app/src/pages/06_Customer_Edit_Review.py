@@ -11,7 +11,7 @@ SideBarLinks()
 st.header('Edit My Reviews')
 
 # Customer ID stored in session state at login
-customer_id = 1000
+customer_id = st.session_state['customer_id']
 
 # --- Fetch this customer's reviews ---
 try:

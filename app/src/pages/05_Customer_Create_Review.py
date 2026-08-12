@@ -11,7 +11,7 @@ SideBarLinks()
 st.header('Write a Review')
 
 # Customer ID stored in session state at login
-customer_id = 1000
+customer_id = st.session_state['customer_id']
 
 # --- Fetch restaurant list for the dropdown ---
 try:

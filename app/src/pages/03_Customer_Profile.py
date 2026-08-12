@@ -11,7 +11,7 @@ SideBarLinks()
 st.header('My Profile')
 
 # Customer ID stored in session state at login (see note below)
-customer_id = 1000
+customer_id = st.session_state['customer_id']
 API_URL = f"http://web-api:4000/customers/customers/{customer_id}"
 
 # --- Fetch customer profile ---
