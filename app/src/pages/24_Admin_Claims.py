@@ -30,10 +30,44 @@ else:
 
 st.divider()
 
-tab1, tab_merge, tab2, tab3, tab4, tab5 = st.tabs([
-    "Merged Restaurants", "Merge Restaurants", "Restaurant Detail", "Create Restaurant",
+tab_all, tab1, tab_merge, tab2, tab3, tab4, tab5 = st.tabs([
+    "All Restaurants", "Merged Restaurants", "Merge Restaurants", "Restaurant Detail", "Create Restaurant",
     "Delete Restaurant", "Claims Queue"
 ])
+
+# --- Tab: All restaurants ---
+with tab_all:
+    st.subheader("All Restaurants")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        cuisine_filter = st.text_input("Cuisine", "", key="all_rest_cuisine")
+    with col2:
+        price_filter = st.selectbox("Price Range", ["All", "$", "$$", "$$$", "$$$$"], key="all_rest_price")
+    with col3:
+        city_filter = st.text_input("City", "", key="all_rest_city")
+
+    params = {}
+    if cuisine_filter:
+        params['cuisine'] = cuisine_filter
+    if price_filter != "All":
+        params['priceRange'] = price_filter
+    if city_filter:
+        params['city'] = city_filter
+
+    try:
+        all_rest_resp = requests.get("http://web-api:4000/restaurants/restaurants", params=params)
+        all_rest_resp.raise_for_status()
+        all_restaurants = all_rest_resp.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching all restaurants: {e}")
+        st.error("Could not load restaurants.")
+        all_restaurants = []
+
+    if all_restaurants:
+        st.dataframe(pd.DataFrame(all_restaurants), use_container_width=True, hide_index=True)
+    else:
+        st.info("No restaurants match these filters.")
 
 # --- Tab 1: Merged restaurants ---
 with tab1:
@@ -69,7 +103,7 @@ with tab_merge:
         else:
             payload = {"mergeIntoId": merge_into_id}
             try:
-                merge_resp = requests.put(f"http://web-api:4000/restaurants/{merge_from_id}", json=payload)
+                merge_resp = requests.put(f"http://web-api:4000/restaurants/restaurants/{merge_from_id}", json=payload)
                 merge_resp.raise_for_status()
                 st.success(f"Restaurant {merge_from_id} merged into {merge_into_id}.")
                 st.rerun()
@@ -85,7 +119,7 @@ with tab2:
 
     if st.button("Look Up"):
         try:
-            full_resp = requests.get(f"http://web-api:4000/restaurant_admin/restaurants/{lookup_id}/full")
+            full_resp = requests.get(f"http://web-api:4000/admin/restaurant_admin/restaurants/{lookup_id}/full")
             if full_resp.status_code == 404:
                 st.warning("Restaurant not found.")
             else:
@@ -162,7 +196,7 @@ with tab3:
                     "managerID": manager_id
                 }
                 try:
-                    create_resp = requests.post("http://web-api:4000/restaurant_admin/restaurants", json=payload)
+                    create_resp = requests.post("http://web-api:4000/admin/restaurant_admin/restaurants", json=payload)
                     create_resp.raise_for_status()
                     result = create_resp.json()
                     st.success(f"Restaurant created with ID {result['restaurantID']}.")
@@ -182,7 +216,7 @@ with tab4:
     if st.button("Delete Restaurant", disabled=not confirm_delete):
         try:
             params = {"force": "true"} if force_delete else {}
-            del_resp = requests.delete(f"http://web-api:4000/restaurant_admin/restaurants/{delete_id}", params=params)
+            del_resp = requests.delete(f"http://web-api:4000/admin/restaurant_admin/restaurants/{delete_id}", params=params)
 
             if del_resp.status_code == 409:
                 st.error(del_resp.json().get('error', 'This restaurant has linked data. Try force delete.'))
