@@ -47,6 +47,7 @@ if st.button("Act as Christopher, a Customer",
     st.session_state['authenticated'] = True
     # we set the role of the current user
     st.session_state['role'] = 'customer'
+    st.session_state['customer_id'] = 1000
     # we add the first name of the user (so it can be displayed on
     # subsequent pages).
     st.session_state['first_name'] = 'Christopher'
