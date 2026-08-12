@@ -40,4 +40,4 @@ if st.button('Create a New Review',
 if st.button('Edit a Review',
              type='primary',
              use_container_width=True):
-    st.switch_page('pages/05_Customer_Edit_Review.py')
+    st.switch_page('pages/06_Customer_Edit_Review.py')

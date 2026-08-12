@@ -14,4 +14,4 @@ st.set_page_config(layout='wide')
 SideBarLinks()
 
 # set the header of the page
-st.header('Create a New Review')
+st.header('Edit a Review')
