@@ -59,15 +59,15 @@ def create_app():
     # Register the routes from each Blueprint with the app object
     # and give a url prefix to each.
     app.logger.info("create_app(): registering blueprints")
-    app.register_blueprint(restaurant_admin)
-    app.register_blueprint(restaurants)
-    app.register_blueprint(customers)
-    app.register_blueprint(managers)
-    app.register_blueprint(reviews)
-    app.register_blueprint(reservations)
-    app.register_blueprint(users)
-    app.register_blueprint(admin)
-    app.register_blueprint(waitlist)
-    app.register_blueprint(menu)
+    app.register_blueprint(restaurant_admin, url_prefix='/restaurant_admin')
+    app.register_blueprint(restaurants, url_prefix='/restaurants')
+    app.register_blueprint(customers, url_prefix='/customers')
+    app.register_blueprint(managers, url_prefix='/managers')
+    app.register_blueprint(reviews, url_prefix='/reviews')
+    app.register_blueprint(reservations, url_prefix='/reservations')
+    app.register_blueprint(users, url_prefix='/users')
+    app.register_blueprint(admin, url_prefix='/admin')
+    app.register_blueprint(waitlist, url_prefix='/waitlist')
+    app.register_blueprint(menu, url_prefix='/menu')
 
     return app

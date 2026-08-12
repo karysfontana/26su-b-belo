@@ -235,3 +235,47 @@ def remove_restaurant_cuisine(restaurantID, cuisineID):
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
+
+
+#Link an existing cuisine tag to this restaurant
+@restaurants.route('/restaurants/<int:restaurantID>/cuisines', methods=['POST'])
+def add_restaurant_cuisine(restaurantID):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        current_app.logger.info(f'POST /restaurants/{restaurantID}/cuisines route')
+        data = request.get_json()
+ 
+        if 'cuisineID' not in data:
+            return jsonify({'error': 'Missing required field: cuisineID'}), 400
+ 
+        cuisine_id = data['cuisineID']
+ 
+        cursor.execute('SELECT * FROM Restaurants WHERE RestaurantID = %s', (restaurantID,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Restaurant not found'}), 404
+ 
+        cursor.execute('SELECT * FROM Cuisine_Tags WHERE cuisineID = %s', (cuisine_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Cuisine tag not found'}), 404
+ 
+        cursor.execute(
+            'SELECT * FROM Restaurant_cuisine WHERE RestaurantID = %s AND CuisineID = %s',
+            (restaurantID, cuisine_id)
+        )
+        if cursor.fetchone():
+            return jsonify({'error': 'This cuisine is already linked to this restaurant'}), 409
+ 
+        cursor.execute(
+            'INSERT INTO Restaurant_cuisine (CuisineID, RestaurantID) VALUES (%s, %s)',
+            (cuisine_id, restaurantID)
+        )
+        get_db().commit()
+ 
+        return jsonify({'message': 'Cuisine tag linked to restaurant'}), 201
+    except Error as e:
+        current_app.logger.error(f'Database error in add_restaurant_cuisine: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+ 
+ 
