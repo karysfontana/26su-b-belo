@@ -19,6 +19,7 @@ st.header('Edit Details')
 # Flask API URL
 API_URL = "http://localhost:4000"
 
+# Get restaurant ID from manager ID 
 restaurant_id = st.session_state.get("restaurant_id")
 
 if restaurant_id is None:
