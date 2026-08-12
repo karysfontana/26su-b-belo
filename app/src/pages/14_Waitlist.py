@@ -1,84 +1,54 @@
-import streamlit as st
+import logging
+logger = logging.getLogger(__name__)
+import pandas as pd
 import requests
+import streamlit as st
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
 
-# Initialize sidebar
 SideBarLinks()
 
-st.title("NGO Directory")
+st.header('Waitlist')
 
-# API endpoint
-API_URL = "http://web-api:4000/ngo/ngos"
+# Manager's restaurant ID — assumed stored in session state at login
+restaurant_id = st.session_state['restaurant_id']
 
-# Create filter columns
-col1, col2, col3 = st.columns(3)
+include_seated = st.checkbox("Include already-seated parties (full history)")
 
-# Get unique values for filters from the API
+params = {"includeSeated": "true"} if include_seated else {}
+
 try:
-    response = requests.get(API_URL)
-    if response.status_code == 200:
-        ngos = response.json()
-
-        # Extract unique values for filters
-        countries = sorted(list(set(ngo["Country"] for ngo in ngos)))
-        focus_areas = sorted(list(set(ngo["Focus_Area"] for ngo in ngos)))
-        founding_years = sorted(list(set(ngo["Founding_Year"] for ngo in ngos)))
-
-        # Create filters
-        with col1:
-            selected_country = st.selectbox("Filter by Country", ["All"] + countries)
-
-        with col2:
-            selected_focus = st.selectbox("Filter by Focus Area", ["All"] + focus_areas)
-
-        with col3:
-            selected_year = st.selectbox(
-                "Filter by Founding Year",
-                ["All"] + [str(year) for year in founding_years],
-            )
-
-        # Build query parameters
-        params = {}
-        if selected_country != "All":
-            params["country"] = selected_country
-        if selected_focus != "All":
-            params["focus_area"] = selected_focus
-        if selected_year != "All":
-            params["founding_year"] = selected_year
-
-        # Get filtered data
-        filtered_response = requests.get(API_URL, params=params)
-        if filtered_response.status_code == 200:
-            filtered_ngos = filtered_response.json()
-
-            # Display results count
-            st.write(f"Found {len(filtered_ngos)} NGOs")
-
-            # Create expandable rows for each NGO
-            for ngo in filtered_ngos:
-                with st.expander(f"{ngo['Name']} ({ngo['Country']})"):
-                    info_col, contact_col = st.columns(2)
-
-                    with info_col:
-                        st.write("**Basic Information**")
-                        st.write(f"**Country:** {ngo['Country']}")
-                        st.write(f"**Founded:** {ngo['Founding_Year']}")
-                        st.write(f"**Focus Area:** {ngo['Focus_Area']}")
-
-                    with contact_col:
-                        st.write("**Contact Information**")
-                        st.write(f"**Website:** [{ngo['Website']}]({ngo['Website']})")
-
-                    # Add a button to view full profile
-                    if st.button("View Full Profile", key=f"view_{ngo['NGO_ID']}"):
-                        st.session_state["selected_ngo_id"] = ngo["NGO_ID"]
-                        st.switch_page("pages/16_NGO_Profile.py")
-
-    else:
-        st.error("Failed to fetch NGO data from the API")
-
+    wl_resp = requests.get(
+        f"http://web-api:4000/waitlist/restaurants/{restaurant_id}/waitlist",
+        params=params
+    )
+    wl_resp.raise_for_status()
+    waitlist_entries = wl_resp.json()
 except requests.exceptions.RequestException as e:
-    st.error(f"Error connecting to the API: {str(e)}")
-    st.info("Please ensure the API server is running on http://web-api:4000")
+    logger.error(f"Error fetching waitlist for restaurant {restaurant_id}: {e}")
+    st.error("Could not load the waitlist. Please try again later.")
+    waitlist_entries = []
+
+if waitlist_entries:
+    df = pd.DataFrame(waitlist_entries)
+    df['arrivalTime'] = pd.to_datetime(df['arrivalTime'])
+    df = df.sort_values(by='arrivalTime', ascending=True)
+
+    # --- Date filter dropdown ---
+    available_dates = sorted(df['arrivalTime'].dt.date.unique())
+    date_options = ["All Dates"] + [d.strftime("%Y-%m-%d") for d in available_dates]
+    selected_date = st.selectbox("Filter by date", date_options)
+
+    if selected_date != "All Dates":
+        selected_date_obj = pd.to_datetime(selected_date).date()
+        df = df[df['arrivalTime'].dt.date == selected_date_obj]
+
+    display_df = df[['entryID', 'firstName', 'lastName', 'partySize', 'arrivalTime', 'seatedTime']]
+
+    if not display_df.empty:
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+    else:
+        st.info(f"No waitlist entries for {selected_date}.")
+else:
+    st.info("No one is currently waiting.")

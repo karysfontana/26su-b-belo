@@ -67,7 +67,7 @@ if st.button('View / Edit Seating Chart',
 if st.button('View Reservations',
              type='primary',
              use_container_width=True):
-    st.switch_page('pages/18_Manager_Reservations.py')
+    st.switch_page('pages/32_manager_reservation.py')
 
 if st.button('Edit Restaurant Information',
              type='primary',
