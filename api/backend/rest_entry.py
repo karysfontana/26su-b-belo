@@ -17,12 +17,12 @@ from backend.Manager.manager_route import managers
 from backend.Review.review_route import reviews
 from backend.reservations.reservation_route import reservations
 from backend.users.user_route import users
+from backend.admin.admin_route import admin
+from backend.waitlist.waitlist_route import waitlist
+from backend.menu.menu_route import menu
+from backend.Seating_chart.seatingchart_route import seatingchart
 
-# Flask's default JSON encoder doesn't know how to turn a TIME column
-# (which mysql-connector returns as a Python timedelta) or a DECIMAL
-# column (returned as Decimal) into JSON. Without this, ANY route that
-# does SELECT * on Restaurants (openTime/closeTime) or Menu_Item (price)
-# crashes with "Object of type timedelta/Decimal is not JSON serializable".
+
 class CustomJSONProvider(DefaultJSONProvider):
     @staticmethod
     def default(obj):
@@ -69,5 +69,5 @@ def create_app():
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(waitlist, url_prefix='/waitlist')
     app.register_blueprint(menu, url_prefix='/menu')
-
+    app.register_blueprint(seatingchart, url_prefix='/seatingchart')
     return app

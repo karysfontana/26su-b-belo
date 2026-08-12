@@ -13,9 +13,9 @@ def get_claims():
         status = request.args.get('status')
         query = '''
             SELECT c.claimID, c.status, c.dateSubmitted, c.dateResolved,
-                   c.restaurantID, r.name AS restaurantName,
-                   c.managerID, m.firstName AS managerFirst, m.lastName AS managerLast,
-                   c.adminReviewed
+                c.restaurantID, r.name AS restaurantName,
+                c.managerID, m.firstName AS managerFirst, m.lastName AS managerLast,
+                c.adminReviewed
             FROM Claim c
             JOIN Restaurants r ON c.restaurantID = r.RestaurantID
             JOIN Manager m ON c.managerID = m.ManagerID
@@ -89,7 +89,7 @@ def resolve_claim(claimID):
             INSERT INTO Log (date, action, adminID)
             VALUES (NOW(), %s, %s)
         ''', (f"Claim {claimID} {data['status']} for restaurant {claim['restaurantID']}",
-              data['adminID']))
+            data['adminID']))
 
         get_db().commit()
         return jsonify({'message': f"Claim {claimID} {data['status']}"}), 200
@@ -108,7 +108,7 @@ def get_logs():
         admin_id = request.args.get('adminID')
         query = '''
             SELECT l.logID, l.date, l.action,
-                   l.adminID, a.firstname, a.lastname
+                l.adminID, a.firstname, a.lastname
             FROM Log l
             JOIN Admin a ON l.adminID = a.adminID
             WHERE 1=1

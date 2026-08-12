@@ -61,13 +61,22 @@ if st.button('Act as Megan, a Manager',
              use_container_width=True):
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'manager'
+    # NOTE: this was missing entirely before — manager_id was never set,
+    # which is why every manager page that needed it kept getting None.
+    st.session_state['manager_id'] = 1000
     st.session_state['first_name'] = 'Megan'
+    logger.info("Logging in as Manager")
     st.switch_page('pages/10_Manager_Home.py')
 
 if st.button('Act as Judy, a System Administrator',
              type='primary',
              use_container_width=True):
     st.session_state['authenticated'] = True
-    st.session_state['role'] = 'administrator'
-    st.session_state['first_name'] = 'SysAdmin'
+    # standardized to 'admin' to match nav.py's role check —
+    # previously this said 'administrator', which never matched
+    # anything in SideBarLinks(), so Judy's sidebar was always empty.
+    st.session_state['role'] = 'admin'
+    st.session_state['admin_id'] = 1000
+    st.session_state['first_name'] = 'Judy'
+    logger.info("Logging in as Admin")
     st.switch_page('pages/20_Admin_Home.py')

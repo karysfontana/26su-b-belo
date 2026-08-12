@@ -15,67 +15,90 @@ def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
 
-# ---- Role: pol_strat_advisor ------------------------------------------------
+# ---- Role: customer -----------------------------------------------------
 
-def pol_strat_home_nav():
-    st.sidebar.page_link(
-        "pages/00_Pol_Strat_Home.py", label="Political Strategist Home", icon="👤"
-    )
+def customer_home_nav():
+    st.sidebar.page_link("pages/00_Customer_Home.py", label="Search Restaurants", icon="🔍")
 
 
-def world_bank_viz_nav():
-    st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
-    )
+def restaurant_viz_nav():
+    st.sidebar.page_link("pages/01_Restaurant_Viz.py", label="Restaurant Viz", icon="📊")
 
 
-def map_demo_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
+def customer_reservations_nav():
+    st.sidebar.page_link("pages/02_Customer_Reservations.py", label="My Reservations", icon="📅")
 
 
-# ---- Role: usaid_worker -----------------------------------------------------
-
-def usaid_worker_home_nav():
-    st.sidebar.page_link(
-        "pages/10_USAID_Worker_Home.py", label="USAID Worker Home", icon="🏠"
-    )
+def customer_profile_nav():
+    st.sidebar.page_link("pages/03_Customer_Profile.py", label="My Profile", icon="👤")
 
 
-def ngo_directory_nav():
-    st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="📁")
+def customer_reviews_nav():
+    st.sidebar.page_link("pages/04_Customer_Reviews.py", label="My Reviews", icon="⭐")
 
 
-def add_ngo_nav():
-    st.sidebar.page_link("pages/15_Add_NGO.py", label="Add New NGO", icon="➕")
+def customer_create_review_nav():
+    st.sidebar.page_link("pages/05_Customer_Create_Review.py", label="Add a Review", icon="➕")
 
 
-def prediction_nav():
-    st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
-    )
+# 06_Customer_Edit_Review.py intentionally has no nav link — same pattern as
+# the template's 16_NGO_Profile.py: reached via a button/session_state from
+# 04_Customer_Reviews.py, not a standalone sidebar destination.
 
 
-def api_test_nav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
+# ---- Role: manager -----------------------------------------------------
+
+def manager_home_nav():
+    st.sidebar.page_link("pages/10_Manager_Home.py", label="Manager Dashboard", icon="🍔")
 
 
-def classification_nav():
-    st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
-    )
+def waitlist_nav():
+    st.sidebar.page_link("pages/14_Waitlist.py", label="Waitlist", icon="🕒")
 
 
-# ---- Role: administrator ----------------------------------------------------
+def add_waitlist_nav():
+    st.sidebar.page_link("pages/15_Add_Waitlist.py", label="Add Walk-In", icon="➕")
+
+
+def manager_restaurant_nav():
+    st.sidebar.page_link("pages/17_Manager_Restaurant.py", label="Restaurant Details", icon="📝")
+
+
+def manager_reservations_nav():
+    st.sidebar.page_link("pages/32_manager_reservation.py", label="Reservations", icon="📅")
+
+
+def seating_chart_nav():
+    st.sidebar.page_link("pages/31_seatingchart.py", label="Seating Chart", icon="🪑")
+
+
+# ---- Role: admin ------------------------------------------------
+
+def LogsNav():
+    st.sidebar.page_link("pages/23_Logs.py", label="Activity Log", icon="🗒️")
+
 
 def admin_home_nav():
     st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
 
 
-def ml_model_mgmt_nav():
+def admin_claims_nav():
     st.sidebar.page_link(
-        "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
+        "pages/24_Admin_Claims.py", label="Claims", icon="📋"
     )
 
+def admin_accounts_nav():
+    st.sidebar.page_link(
+        "pages/22_Admin_Accounts_Review.py", label="Accounts", icon="👥"
+    )
+
+def admin_logs_nav():
+    st.sidebar.page_link(
+        "pages/23_Logs.py", label="Audit Logs", icon="📋"
+    )
+
+def customer_friends_nav():
+    st.sidebar.page_link("pages/33_customer_friend.py", label="Friends reviews", icon="👥")
 
 # ---- Sidebar assembly -------------------------------------------------------
 
@@ -86,7 +109,7 @@ def SideBarLinks(show_home=False):
     """
 
     # Logo appears at the top of the sidebar on every page
-    st.sidebar.image("assets/logo.png", width=650)
+    st.sidebar.image("assets/logo.png", width=650)  
 
     # If no one is logged in, send them to the Home (login) page
     if "authenticated" not in st.session_state:
@@ -98,22 +121,32 @@ def SideBarLinks(show_home=False):
 
     if st.session_state["authenticated"]:
 
-        if st.session_state["role"] == "pol_strat_advisor":
-            pol_strat_home_nav()
-            world_bank_viz_nav()
-            map_demo_nav()
+        if st.session_state["role"] == "customer":
+            customer_home_nav()
+            restaurant_viz_nav()
+            customer_reservations_nav()
+            customer_profile_nav()
+            customer_reviews_nav()
+            customer_create_review_nav()
+            customer_friends_nav()
 
-        if st.session_state["role"] == "usaid_worker":
-            usaid_worker_home_nav()
-            ngo_directory_nav()
-            add_ngo_nav()
-            prediction_nav()
-            api_test_nav()
-            classification_nav()
+        if st.session_state["role"] == "manager":
+            manager_home_nav()
+            manager_restaurant_nav()
+            manager_reservations_nav()
+            waitlist_nav()
+            add_waitlist_nav()
+            seating_chart_nav()
 
-        if st.session_state["role"] == "administrator":
+        # NOTE: confirm this matches exactly what Home.py sets for the
+        # admin login button — it must be either "admin" or "administrator"
+        # in BOTH places, not one of each, or this block silently never runs.
+        if st.session_state["role"] == "admin":
             admin_home_nav()
-            ml_model_mgmt_nav()
+            admin_claims_nav()
+            admin_accounts_nav()
+            admin_logs_nav()
+
 
     # About link appears at the bottom for all roles
     about_page_nav()

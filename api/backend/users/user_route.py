@@ -46,14 +46,16 @@ def get_user(userID):
  
  
 # List who a user follows
+# (Follows references User directly, per the DDL)
 @users.route('/users/<int:userID>/follows', methods=['GET'])
 def get_follows(userID):
     cursor = get_db().cursor(dictionary=True)
     try:
         cursor.execute('''
-            SELECT u.UserID, u.status
+            SELECT u.UserID, c.firstname, c.lastname
             FROM Follows f
             JOIN User u ON f.followingID = u.UserID
+            JOIN Customer c ON u.UserID = c.userID
             WHERE f.followerID = %s
         ''', (userID,))
         theData = cursor.fetchall()

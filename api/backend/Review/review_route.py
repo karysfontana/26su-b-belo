@@ -155,3 +155,33 @@ def delete_review(reviewID):
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
+
+# Reviews written by people this user follows 
+@reviews.route('/reviews/friends/<int:userID>', methods=['GET'])
+def get_friends_reviews(userID):
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        cursor.execute('''
+            SELECT rv.*, c.firstname, c.lastname, r.name AS restaurantName
+            FROM Follows f
+            JOIN Customer c ON f.followingID = c.userID
+            JOIN Reviews rv ON c.customerID = rv.customerID
+            JOIN Restaurants r ON rv.RestaurantID = r.RestaurantID
+            WHERE f.followerID = %s AND rv.Status = 'active'
+            ORDER BY rv.createdAt DESC
+        ''', (userID,))
+        theData = cursor.fetchall()
+
+        for rv in theData:
+            cursor.execute(
+                'SELECT ratingType, rate FROM Rating WHERE reviewID = %s',
+                (rv['reviewID'],)
+            )
+            rv['ratings'] = cursor.fetchall()
+
+        return jsonify(theData), 200
+    except Error as e:
+        current_app.logger.error(f'Database error in get_friends_reviews: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
