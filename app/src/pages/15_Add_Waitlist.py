@@ -8,7 +8,7 @@ st.set_page_config(layout='wide')
 # Initialize sidebar
 SideBarLinks()
 
-st.title("Add New NGO")
+st.title("Add New Party")
 
 # Initialize session state for modal
 if "show_success_modal" not in st.session_state:

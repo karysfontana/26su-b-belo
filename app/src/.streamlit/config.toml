@@ -63,8 +63,8 @@ showWidgetBorder = true
 # like a stock Streamlit app.
 # ------------------------------------------------------------
 [theme.sidebar]
-backgroundColor = "#232B2B"
-secondaryBackgroundColor = "#33403D"
-textColor = "#E9EDEB"
-primaryColor = "#4E9C8D"
-borderColor = "#33403D"
+backgroundColor = "#f7b071"
+secondaryBackgroundColor = "#d5f9f1"
+textColor = "#2c3832"
+primaryColor = "#ecba74"
+borderColor = "#e2b6c8"
