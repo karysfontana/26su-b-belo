@@ -1,11 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
-import pandas as pd
 import streamlit as st
-import world_bank_data as wb
-import matplotlib.pyplot as plt
-import numpy as np
-import plotly.express as px
+import requests 
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
@@ -16,20 +12,25 @@ SideBarLinks()
 # set the header of the page
 st.header('Edit Details')
 
-# Flask API URL
-API_URL = "http://localhost:4000"
+# API endpoint
+API_URL = "http://web-api:4000"
+
+manager_id = st.session_state.get("manager_id")
 
 # Get restaurant ID from manager ID 
 restaurant_id = st.session_state.get("restaurant_id")
 
 if restaurant_id is None:
+    # for the sake of viewing while bob data isn't set. 
     st.error("No restaurant is associated with this manager.")
     st.stop()
+    # restaurant_id = 1000
 
-# Helper function to get restaurant data 
+# Helper functions to get data 
+# Get restaurant data 
 def get_restaurant(restaurant_id):
     response = requests.get(
-        f"{API_URL}/restaurants/{restaurant_id}"
+        f"{API_URL}/restaurants/restaurants/{restaurant_id}"
     )
 
     if response.status_code == 200:
@@ -44,5 +45,13 @@ restaurant = get_restaurant(restaurant_id)
 if restaurant is None:
     st.stop()
 
-current_cuisines = get_restaurant_cuisines(restaurant_id)
-all_cuisines = get_all_cuisines()
+def get_cuisine(cuisine):
+    response = requests.get(
+        f"{API_URL}/restaurants/{cuisine}"
+    )
+
+    if response.status_code == 200: 
+        return response.json()
+
+    st.error(f"Could not load cuisine: {response.text}")
+    return None
