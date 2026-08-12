@@ -31,8 +31,7 @@ st.write("Selected Restaurant ID:", restaurant_id)
 
 try:
     response = requests.get(
-        f"{API_URL}/restaurants/restaurants/{restaurant_id}",
-        timeout=10
+        f"{API_URL}/restaurants/restaurants/{restaurant_id}"
     )
 except requests.exceptions.RequestException as e:
     st.error(f"Error connecting to the API: {e}")
@@ -61,8 +60,7 @@ st.caption(
 try:
     cuisine_response = requests.get(
         f"{API_URL}/restaurants/restaurants/"
-        f"{restaurant_id}/cuisines",
-        timeout=10
+        f"{restaurant_id}/cuisines"
     )
     if cuisine_response.status_code == 200:
         current_cuisines = cuisine_response.json()
@@ -74,8 +72,7 @@ except requests.exceptions.RequestException:
 # Get all cuisines 
 try:
     all_cuisine_response = requests.get(
-        f"{API_URL}/restaurants/cuisinetags",
-        timeout=10
+        f"{API_URL}/restaurants/cuisinetags"
     )
     if all_cuisine_response.status_code == 200:
         all_cuisines = all_cuisine_response.json()
@@ -204,7 +201,6 @@ if save:
         update_response = requests.put(
             f"{API_URL}/restaurants/restaurants/{restaurant_id}",
             json=update_data,
-            timeout=10
         )
     except requests.exceptions.RequestException as e:
         st.error(
@@ -224,3 +220,59 @@ if save:
             f"{error_message}"
         )
         st.stop()
+
+    # Handle cuisine changes (cuisine ids)
+    current_cuisine_ids = set()
+    for cuisine in current_cuisines:
+        cuisine_id = cuisine.get("cuisineID")
+        if cuisine_id is not None:
+            current_cuisine_ids.add(cuisine_id)
+    selected_cuisine_ids = set()
+    for cuisine_name in selected_cuisines:
+        cuisine_id = cuisine_lookup.get(cuisine_name)
+        if cuisine_id is not None:
+            selected_cuisine_ids.add(cuisine_id)
+    # Get changes 
+    cuisines_to_add = (
+        selected_cuisine_ids - current_cuisine_ids
+    )
+    cuisines_to_remove = (
+        current_cuisine_ids - selected_cuisine_ids
+    )
+
+    cuisine_errors = []
+    # add new cuisines now
+    for cuisine_id in cuisines_to_remove:
+        try:
+            remove_response = requests.delete(
+                f"{API_URL}/restaurants/restaurants/"
+                f"{restaurant_id}/cuisines/{cuisine_id}"
+            )
+            if remove_response.status_code != 200:
+                try:
+                    error = remove_response.json().get(
+                        "error",
+                        remove_response.text
+                    )
+                except Exception:
+                    error = remove_response.text
+                cuisine_errors.append(
+                    f"Could not remove cuisine {cuisine_id}: {error}"
+                )
+        except requests.exceptions.RequestException as e:
+            cuisine_errors.append(
+                f"Could not remove cuisine {cuisine_id}: {e}"
+            )
+
+    # Show
+    if cuisine_errors: 
+        st.warning(
+            "Some cuisines failed to save."
+        )
+        for error in cuisine_errors:
+            st.write(f"- {error}")
+    else:
+        st.success(
+            "Edits saved."
+        )
+    st.rerun()
