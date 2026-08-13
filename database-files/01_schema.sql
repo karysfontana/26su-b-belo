@@ -144,7 +144,7 @@ CREATE TABLE Reviews (
 
 DROP TABLE IF EXISTS Rating;
 CREATE TABLE Rating (
-   RatingID INT,
+   RatingID INT AUTO_INCREMENT PRIMARY KEY,
    reviewID INT,
    rate INT UNSIGNED NOT NULL,
    ratingType varchar(7) NOT NULL,
