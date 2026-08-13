@@ -85,10 +85,16 @@ def resolve_claim(claimID):
             WHERE claimID = %s
         ''', (data['status'], data['adminID'], claimID))
 
+        # look up the restaurant's name so the log reads clearly instead
+        # of showing a raw ID
+        cursor.execute('SELECT name FROM Restaurants WHERE RestaurantID = %s', (claim['restaurantID'],))
+        restaurant = cursor.fetchone()
+        restaurant_name = restaurant['name'] if restaurant else f"restaurant #{claim['restaurantID']}"
+
         cursor.execute('''
             INSERT INTO Log (date, action, adminID)
             VALUES (NOW(), %s, %s)
-        ''', (f"Claim {claimID} {data['status']} for restaurant {claim['restaurantID']}",
+        ''', (f"Claim {claimID} {data['status']} for {restaurant_name}",
             data['adminID']))
 
         get_db().commit()

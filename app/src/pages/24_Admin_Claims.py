@@ -216,7 +216,7 @@ with tab4:
     if st.button("Delete Restaurant", disabled=not confirm_delete):
         try:
             params = {"force": "true"} if force_delete else {}
-            del_resp = requests.delete(f"http://web-api:4000/admin/restaurant_admin/restaurants/{delete_id}", params=params)
+            del_resp = requests.delete(f"http://web-api:4000/restaurant_admin/restaurants/{delete_id}", params=params)
 
             if del_resp.status_code == 409:
                 st.error(del_resp.json().get('error', 'This restaurant has linked data. Try force delete.'))

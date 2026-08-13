@@ -33,16 +33,23 @@ CREATE TABLE User (
 );
 
 
+-- CASCADE: deleting a user cleanly removes any follow relationships
+-- they were part of, either as the follower or the one being followed.
 DROP TABLE IF EXISTS Follows;
 CREATE TABLE Follows (
    followerID INT,
    followingID INT,
    PRIMARY KEY (followerID, followingID),
-   FOREIGN KEY (followerID) REFERENCES User(UserID),
-   FOREIGN KEY (followingID) REFERENCES User(UserID)
+   FOREIGN KEY (followerID) REFERENCES User(UserID) ON DELETE CASCADE,
+   FOREIGN KEY (followingID) REFERENCES User(UserID) ON DELETE CASCADE
 );
 
 
+-- INTENTIONALLY LEFT AS RESTRICT (the default): if a manager still owns
+-- restaurants, we do NOT want deleting the User row to silently cascade
+-- into deleting Manager, then every Restaurant they run, then every
+-- review/reservation/menu attached to those restaurants. The app enforces
+-- this by refusing the delete with a clear message if restaurants exist.
 DROP TABLE IF EXISTS Manager;
 CREATE TABLE Manager (
    ManagerID INT PRIMARY KEY,
@@ -52,13 +59,15 @@ CREATE TABLE Manager (
    FOREIGN KEY (userID) REFERENCES User(UserID)
 );
 
+-- CASCADE: deleting a user who is a customer removes their Customer
+-- profile row along with them.
 DROP TABLE IF EXISTS Customer;
 CREATE TABLE Customer (
    customerID INT AUTO_INCREMENT PRIMARY KEY,
    firstname varchar(40),
    lastname varchar(40),
    userID INT,
-   FOREIGN KEY (userID) REFERENCES User(UserID)
+   FOREIGN KEY (userID) REFERENCES User(UserID) ON DELETE CASCADE
 );
 
 
@@ -111,16 +120,21 @@ CREATE TABLE Restaurants (
    FOREIGN KEY (MenuID) REFERENCES Menu(menuID)
 );
 
+-- CASCADE: deleting a restaurant removes its cuisine tag links (not the
+-- tags themselves, just the association rows).
 DROP TABLE IF EXISTS Restaurant_cuisine;
 CREATE TABLE Restaurant_cuisine (
    CuisineID INT,
    RestaurantID INT,
    PRIMARY KEY (CuisineID, RestaurantID),
    FOREIGN KEY (CuisineID) REFERENCES Cuisine_Tags(cuisineID),
-   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
+   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE
 );
 
 
+-- CASCADE (changed from RESTRICT): deleting a restaurant removes its
+-- reviews along with it. Ratings already cascade from Reviews, so this
+-- also cleans those up automatically.
 DROP TABLE IF EXISTS Reviews;
 CREATE TABLE Reviews (
    reviewID INT AUTO_INCREMENT PRIMARY KEY,
@@ -131,13 +145,13 @@ CREATE TABLE Reviews (
    flaggedBy INT,
    RestaurantID INT NOT NULL,
    FOREIGN KEY (customerID) REFERENCES Customer(customerID)
-                    ON DELETE RESTRICT
+                    ON DELETE CASCADE
                     ON UPDATE RESTRICT,
    FOREIGN KEY (flaggedBy) REFERENCES Admin(adminID)
                     ON DELETE RESTRICT
                     ON UPDATE RESTRICT,
    FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
-			  ON DELETE RESTRICT
+			  ON DELETE CASCADE
                     ON UPDATE RESTRICT
 );
 
@@ -154,13 +168,14 @@ CREATE TABLE Rating (
 );
 
 
+-- CASCADE: deleting a restaurant removes any admin flags on it.
 DROP TABLE IF EXISTS flagged_restaurant;
 CREATE TABLE flagged_restaurant (
    adminID INT,
    RestaurantID INT,
    PRIMARY KEY (adminID, RestaurantID),
    FOREIGN KEY (adminID) REFERENCES Admin(adminID),
-   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
+   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE
 );
 
 
@@ -175,16 +190,19 @@ CREATE TABLE Neighborhood_Tag (
 );
 
 
+-- CASCADE: deleting a restaurant removes its neighborhood tag link.
 DROP TABLE IF EXISTS Restaurant_Neighborhood;
 CREATE TABLE Restaurant_Neighborhood (
    NeighborhoodID INT,
    RestaurantID Int,
    PRIMARY KEY (NeighborhoodID,RestaurantID),
    FOREIGN KEY (NeighborhoodID) REFERENCES Neighborhood_Tag(NeighborhoodID),
-   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
+   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE
 );
 
 
+-- CASCADE: deleting a restaurant removes any ownership claims filed
+-- against it.
 DROP TABLE IF EXISTS Claim;
 CREATE TABLE Claim (
    claimID INT AUTO_INCREMENT PRIMARY KEY,
@@ -195,11 +213,13 @@ CREATE TABLE Claim (
    restaurantID INT NOT NULL,
    managerID INT NOT NULL,
    FOREIGN KEY (adminReviewed) REFERENCES Admin(adminID),
-   FOREIGN KEY (restaurantID) REFERENCES Restaurants(RestaurantID),
+   FOREIGN KEY (restaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE,
    FOREIGN KEY (managerID) REFERENCES Manager(ManagerID)
 );
 
 
+-- CASCADE: deleting a restaurant or a customer removes their
+-- reservations along with them.
 DROP TABLE IF EXISTS Reservation;
 CREATE TABLE Reservation (
    resvID INT AUTO_INCREMENT PRIMARY KEY,
@@ -210,12 +230,13 @@ CREATE TABLE Reservation (
    CustomerID INT NOT NULL,
    AppManagerID INT,
    RestaurantID INT NOT NULL,
-   FOREIGN KEY (CustomerID) REFERENCES Customer(customerID),
+   FOREIGN KEY (CustomerID) REFERENCES Customer(customerID) ON DELETE CASCADE,
    FOREIGN KEY (AppManagerID) REFERENCES Manager(ManagerID),
-   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
+   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE
 );
 
 
+-- CASCADE: deleting a restaurant removes its seating charts.
 DROP TABLE IF EXISTS SeatingChart;
 CREATE TABLE SeatingChart (
    chartID INT AUTO_INCREMENT PRIMARY KEY,
@@ -223,20 +244,24 @@ CREATE TABLE SeatingChart (
    date DATE,
    openTable INT,
    RestaurantID INT NOT NULL,
-   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
+   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE
 );
 
 
+-- CASCADE: needed so deleting a Reservation or SeatingChart (which now
+-- cascade from Restaurants above) doesn't get blocked one level deeper
+-- by this bridge table.
 DROP TABLE IF EXISTS ReservedSeating;
 CREATE TABLE ReservedSeating (
    resvID INT,
    chartID INT,
    PRIMARY KEY (resvID,chartID),
-   FOREIGN KEY (resvID) REFERENCES Reservation(resvID),
-   FOREIGN KEY (chartID) REFERENCES SeatingChart(chartID)
+   FOREIGN KEY (resvID) REFERENCES Reservation(resvID) ON DELETE CASCADE,
+   FOREIGN KEY (chartID) REFERENCES SeatingChart(chartID) ON DELETE CASCADE
 );
 
 
+-- CASCADE: deleting a restaurant removes its waitlist entries.
 DROP TABLE IF EXISTS WaitList;
 CREATE TABLE WaitList (
    entryID INT AUTO_INCREMENT PRIMARY KEY,
@@ -248,15 +273,17 @@ CREATE TABLE WaitList (
    ManagerEdit INT,
    RestaurantID INT NOT NULL,
    FOREIGN KEY (ManagerEdit) REFERENCES Manager(ManagerID),
-   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID)
+   FOREIGN KEY (RestaurantID) REFERENCES Restaurants(RestaurantID) ON DELETE CASCADE
 );
 
 
+-- CASCADE: same reasoning as ReservedSeating — needed so deleting a
+-- SeatingChart or WaitList entry isn't blocked by this bridge table.
 DROP TABLE IF EXISTS seating_WaitList;
 CREATE TABLE seating_WaitList (
    chartID INT,
    entryID INT,
    PRIMARY KEY (chartID,entryID),
-   FOREIGN KEY (chartID) REFERENCES SeatingChart(chartID),
-   FOREIGN KEY (entryID) REFERENCES WaitList(entryID)
+   FOREIGN KEY (chartID) REFERENCES SeatingChart(chartID) ON DELETE CASCADE,
+   FOREIGN KEY (entryID) REFERENCES WaitList(entryID) ON DELETE CASCADE
 );

@@ -91,7 +91,7 @@ A couple of gaps are visible in the current build, called out here rather than g
 
 ## Video Demo
 
-[Link to be added]
+https://youtu.be/GKGbQR40_fs 
 
 ## Team Contributions
 
