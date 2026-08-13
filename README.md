@@ -96,4 +96,5 @@ A couple of gaps are visible in the current build, called out here rather than g
 ## Team Contributions
 
 - **Richie Nguyen** — `restaurants`, `restaurant_admin`, `customers`, `managers`, `reviews`, `reservations`, and `users` Flask blueprints; database schema and mock data generation
-- **Hosam Esawy, Karys Fontana, Nora Harr** — `admin` (claims/logs), `waitlist`, and `menu` Flask blueprints
+- **Hosam Esawy** — user personas and user stories; `admin` (claims/logs), `waitlist`, and `menu` Flask blueprints; admin home page
+- **Karys Fontana, Nora Harr** — `admin` (claims/logs), `waitlist`, and `menu` Flask blueprints
