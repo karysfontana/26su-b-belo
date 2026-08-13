@@ -22,7 +22,7 @@ def customer_home_nav():
 
 
 def restaurant_viz_nav():
-    st.sidebar.page_link("pages/01_Restaurant_Viz.py", label="Restaurant Viz", icon="📊")
+    st.sidebar.page_link("pages/01_View_Restaurants.py", label="View Restaurants", icon="📊")
 
 
 def customer_reservations_nav():
