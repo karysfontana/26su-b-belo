@@ -72,9 +72,9 @@ BELO uses the same lightweight, no-real-authentication RBAC pattern as the cours
 
 | Button | Role string | Redirects to |
 |---|---|---|
-| Act as a Customer/Reviewer | `customer` | `pages/00_Peter_Home.py` |
-| Act as a Restaurant Owner/Manager | `manager` | `pages/10_Bob_Home.py` |
-| Act as a Platform Admin | `admin` | `pages/20_Judy_Home.py` |
+| Act as a Customer/Reviewer | `customer` | `pages/00_Customer_Home.py` |
+| Act as a Restaurant Owner/Manager | `manager` | `pages/10_Manager_Home.py` |
+| Act as a Platform Admin | `admin` | `pages/20_Admin_Home.py` |
 
 Rather than hardcoding specific IDs for each persona, our Home page pulls a real customer/manager/admin record from the API at login time — this keeps the login flow working correctly even after the database is reset and reseeded with fresh mock data.
 
